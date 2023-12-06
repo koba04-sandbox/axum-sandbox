@@ -1,5 +1,5 @@
-use axum::{response::Html, routing::get, Json, Router};
-use serde::{Serialize, Deserialize};
+use axum::{routing::{get,post}, Router};
+use toy_app::{root_handler, api_handler, post_api_handler};
 
 #[tokio::main]
 async fn main() {
@@ -17,28 +17,14 @@ async fn app() -> Router {
     Router::new()
         .route("/", get(root_handler))
         .route("/api", get(api_handler))
-}
-
-async fn root_handler() -> Html<&'static str> {
-    Html("<h1>Hello</h1>")
-}
-
-#[derive(Serialize, Deserialize)]
-struct Response {
-    name: String,
-}
-
-async fn api_handler() -> Json<Response> {
-    let response = Response {
-        name: "Rust".to_string(),
-    };
-    Json(response)
+        .route("/api", post(post_api_handler))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use reqwest;
+    use toy_app::Response;
 
     #[tokio::test]
     async fn it_works() {
@@ -73,6 +59,6 @@ mod tests {
             .json::<Response>()
             .await
             .unwrap();
-        assert_eq!(json.name, "Rust");
+        assert_eq!(json.count, 3);
     }
 }
