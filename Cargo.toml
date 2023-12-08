@@ -9,6 +9,7 @@ edition = "2021"
 axum = "0.7.1"
 tokio = { version = "1.34.0", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
+redis = { version = "0.24.0", features = ["tokio-comp"] }
 
 [dev-dependencies]
 reqwest = { version = "0.11", features = ["json"] }

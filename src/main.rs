@@ -14,10 +14,12 @@ async fn main() {
 }
 
 async fn app() -> Router {
+    let client = redis::Client::open("redis://127.0.0.1:6379/").unwrap();
     Router::new()
         .route("/", get(root_handler))
         .route("/api", get(api_handler))
         .route("/api", post(post_api_handler))
+        .with_state(client)
 }
 
 #[cfg(test)]
