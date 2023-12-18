@@ -1,5 +1,5 @@
-mod index;
 mod api;
+mod index;
 
-pub use index::*;
 pub use api::*;
+pub use index::*;

@@ -1,31 +1,15 @@
-use axum::response::Html;
+use askama::Template;
+use axum::{extract::State, response::Html};
+use redis::Commands;
 
-pub async fn root_handler() -> Html<&'static str> {
-    Html(
-        r#"
-        <!doctype html>
-        <html>
-            <head>
-                <meta charset="utf-8">
-            </head>
-            <body>
-                <h1>Hello Axum</h1>
-                <p id="count">Loading...</p>
-                <button id="increment">++</button>
-                <script>
-                    const btn = document.getElementById("increment");
-                    const text = document.getElementById("count");
-                    fetch("/api").then(res => res.json()).then(res => {
-                        text.textContent = res.count;
-                    });
-                    document.getElementById("increment").addEventListener("click", () => {
-                        fetch("/api", { method: "POST" }).then(res => res.json()).then(res => {
-                            text.textContent = res.count;
-                        })
-                    });
-                </script>
-            </body>
-        </html>
-        "#
-    )
+#[derive(Template)]
+#[template(path = "index.html")]
+struct IndexTemplate {
+    count: i32,
+}
+
+pub async fn root_handler(State(mut client): State<redis::Client>) -> Html<String> {
+    let count: i32 = client.get("count").unwrap();
+    let template = IndexTemplate { count };
+    Html(template.render().unwrap())
 }

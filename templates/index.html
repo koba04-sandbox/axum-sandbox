@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <h1>Hello Axum</h1>
+        <p id="count">{{count}}</p>
+        <button id="increment">++</button>
+        <script>
+            const btn = document.getElementById("increment");
+            const text = document.getElementById("count");
+            document.getElementById("increment").addEventListener("click", () => {
+                fetch("/api", { method: "POST" }).then(res => res.json()).then(res => {
+                    text.textContent = res.count;
+                })
+            });
+        </script>
+    </body>
+</html>

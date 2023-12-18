@@ -1,13 +1,14 @@
-use axum::{routing::{get,post}, Router};
-use toy_app::{root_handler, api_handler, post_api_handler};
+use axum::{
+    routing::{get, post},
+    Router,
+};
+use toy_app::{api_handler, post_api_handler, root_handler};
 
 #[tokio::main]
 async fn main() {
     let router = app().await;
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
-        .await
-        .unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     println!("Listening on {}", listener.local_addr().unwrap());
 
     axum::serve(listener, router).await.unwrap();
