@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get, post, get_service},
+    routing::{get, get_service, post},
     Router,
 };
 use tower_http::services::ServeDir;
@@ -14,7 +14,6 @@ async fn main() {
 
     axum::serve(listener, router).await.unwrap();
 }
-
 
 async fn app() -> Router {
     let client = redis::Client::open("redis://127.0.0.1:6379/").unwrap();
@@ -35,7 +34,7 @@ mod tests {
     use toy_app::Response;
 
     #[tokio::test]
-    async fn it_works() {
+    async fn returns_index_html() {
         let router = app().await;
         let address = "127.0.0.1:8000";
         let listener = tokio::net::TcpListener::bind(address).await.unwrap();
@@ -49,11 +48,11 @@ mod tests {
             .text()
             .await
             .unwrap();
-        assert_eq!(html, "<h1>Hello</h1>");
+        assert!(html.contains("<h1>Hello Axum</h1>"));
     }
 
     #[tokio::test]
-    async fn api_returns_json() {
+    async fn update_count_through_api() {
         let router = app().await;
         let address = "127.0.0.1:8001";
         let listener = tokio::net::TcpListener::bind(address).await.unwrap();
@@ -61,12 +60,27 @@ mod tests {
             axum::serve(listener, router).await.unwrap();
         });
 
-        let json = reqwest::get(format!("http://{}/api", address))
+        let client = reqwest::Client::new();
+        let json = client
+            .get(format!("http://{}/api", address))
+            .send()
             .await
             .unwrap()
             .json::<Response>()
             .await
             .unwrap();
-        assert_eq!(json.count, 3);
+        let count = json.count;
+
+        let client = reqwest::Client::new();
+        let json = client
+            .post(format!("http://{}/api", address))
+            .send()
+            .await
+            .unwrap()
+            .json::<Response>()
+            .await
+            .unwrap();
+
+        assert_eq!(json.count, count + 1);
     }
 }
