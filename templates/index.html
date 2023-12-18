@@ -7,14 +7,6 @@
         <h1>Hello Axum</h1>
         <p id="count">{{count}}</p>
         <button id="increment">++</button>
-        <script>
-            const btn = document.getElementById("increment");
-            const text = document.getElementById("count");
-            document.getElementById("increment").addEventListener("click", () => {
-                fetch("/api", { method: "POST" }).then(res => res.json()).then(res => {
-                    text.textContent = res.count;
-                })
-            });
-        </script>
+        <script type="module" src="/public/js/index.js"></script>
     </body>
 </html>

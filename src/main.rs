@@ -1,7 +1,8 @@
 use axum::{
-    routing::{get, post},
+    routing::{get, post, get_service},
     Router,
 };
+use tower_http::services::ServeDir;
 use toy_app::{api_handler, post_api_handler, root_handler};
 
 #[tokio::main]
@@ -14,12 +15,16 @@ async fn main() {
     axum::serve(listener, router).await.unwrap();
 }
 
+
 async fn app() -> Router {
     let client = redis::Client::open("redis://127.0.0.1:6379/").unwrap();
+    let serve_static = get_service(ServeDir::new("public"));
+
     Router::new()
         .route("/", get(root_handler))
         .route("/api", get(api_handler))
         .route("/api", post(post_api_handler))
+        .nest_service("/public", serve_static)
         .with_state(client)
 }
 
