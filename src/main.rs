@@ -1,3 +1,5 @@
+use std::env;
+
 use axum::{
     routing::{get, get_service, post},
     Router,
@@ -16,7 +18,8 @@ async fn main() {
 }
 
 async fn app() -> Router {
-    let client = redis::Client::open("redis://127.0.0.1:6379/").unwrap();
+    let redis_url = env::var("REDIS_URL").unwrap();
+    let redis = redis::Client::open(redis_url).unwrap();
     let serve_static = get_service(ServeDir::new("public"));
 
     Router::new()
@@ -24,7 +27,7 @@ async fn app() -> Router {
         .route("/api", get(api_handler))
         .route("/api", post(post_api_handler))
         .nest_service("/public", serve_static)
-        .with_state(client)
+        .with_state(redis)
 }
 
 #[cfg(test)]
